@@ -17,7 +17,7 @@
     "test": "./node_modules/.bin/jest --ci --testResultsProcessor='jest-junit'",
     "test_seed": "./node_modules/.bin/node ./server/db-models/test-seed.js",
     "start": "./node_modules/.bin/node ./server/server.js",
-    "seed": "./node_modules/.bin/node ./server/db-models/seed.js reviewservice 10000 10000 10",
+    "seed": "./node_modules/.bin/node ./server/db-models/seed.js reviewservice 100000 10000 10",
     "stats": "./node_modules/.bin/node ./server/db-models/stats.js reviewservice",
     "stats_test": "./node_modules/.bin/node ./server/db-models/stats.js testreviewservice",
     "clear_test": "./node_modules/.bin/node ./server/db-models/clear.js testreviewservice"
@@ -31,7 +31,7 @@
     "faker": "^4.1.0",
     "hasher": "^1.2.0",
     "moment": "^2.20.1",
-    "mongodb": "^3.0.2",
+    "mongodb": "^3.0.4",
     "mongoose": "^5.0.6",
     "node": "^9.5.0",
     "npm": "^5.6.0",

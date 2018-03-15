@@ -10,12 +10,19 @@ const NUM_HOLD = 1000;
 console.log(DB_NAME);
 
 const mongoose = require('mongoose');
-mongoose.connect("mongodb://localhost/" + DB_NAME);
+const MongoClient = require('mongodb').MongoClient;
+mongoose.connect(`mongodb://localhost/${DB_NAME}`);
 const faker = require('faker');
 const chance = new require('chance')(); // for normally distributed numbers
 const Models = require('./models.js');
 
 async function seedDB() {
+  const Client = await MongoClient.connect(`mongodb://localhost/${DB_NAME}`);
+  const mdb = Client.db(DB_NAME);
+  const UserCollection = mdb.collection('User');
+  const RestaurantCollection = mdb.collection('Restaurant');
+  const ReviewCollection = mdb.collection('Review');
+
   let saveUsers, saveRestaurants;
   async function seedUsers() {
       let createdUsers = _.range(0, NUM_USR).map(() => {
@@ -25,7 +32,7 @@ async function seedDB() {
           avatar: faker.image.avatar()
         });
       });
-      await Models.userModel.insertMany(createdUsers);
+      await UserCollection.insertMany(createdUsers);
       return createdUsers;
   }
 
@@ -36,7 +43,7 @@ async function seedDB() {
         locations: _.map(() => faker.address.city() , _.range(0, Math.max(1, Math.round(chance.normal({ mean: 2 , dev: 1 })))))
       });
     });
-    await Models.restaurantModel.insertMany(createdRestaurants);
+    await RestaurantCollection.insertMany(createdRestaurants);
     return createdRestaurants;
   }
 
@@ -75,7 +82,8 @@ async function seedDB() {
       });
     });
   });
-  await Models.reviewsModel.insertMany(_.flatten(reviewModels));
+  await ReviewCollection.insertMany(_.flatten(reviewModels));
+  Client.close();
 }
 const START_TIME = new Date();
 seedDB().then((reviews) => {
