@@ -15,6 +15,22 @@ mongoose.connect(`mongodb://localhost/${DB_NAME}`);
 const faker = require('faker');
 const chance = new require('chance')(); // for normally distributed numbers
 const Models = require('./models.js');
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
+
+if (cluster.isMaster){
+  console.log(`Master ${process.pid} is running`);
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`worker ${worker.process.pid} finished`);
+  });
+} else {
+  seedDB();
+  console.log(`Worker ${process.pid} started`);
+}
 
 async function seedDB() {
   const Client = await MongoClient.connect(`mongodb://localhost/${DB_NAME}`);
@@ -22,10 +38,12 @@ async function seedDB() {
   const UserCollection = mdb.collection('User');
   const RestaurantCollection = mdb.collection('Restaurant');
   const ReviewCollection = mdb.collection('Review');
-
+  const PART_USR = Math.floor(NUM_USR / numCPUs);
+  const PART_RES = Math.floor(NUM_RES / numCPUs);
   let saveUsers, saveRestaurants;
+
   async function seedUsers() {
-      let createdUsers = _.range(0, NUM_USR).map(() => {
+      let createdUsers = _.range(0, PART_USR).map(() => {
         return Models.userModel({
           name: faker.name.findName(),
           isVIP: faker.random.boolean(),
@@ -37,7 +55,7 @@ async function seedDB() {
   }
 
   async function seedRestraunts() {
-    let createdRestaurants = _.range(0, NUM_RES).map(() => {
+    let createdRestaurants = _.range(0, PART_RES).map(() => {
       return Models.restaurantModel({
         name: faker.random.words(2),
         locations: _.map(() => faker.address.city() , _.range(0, Math.max(1, Math.round(chance.normal({ mean: 2 , dev: 1 })))))
@@ -51,7 +69,7 @@ async function seedDB() {
     seedUsers().then(result => saveUsers = result),
     seedRestraunts().then(result => saveRestaurants = result)
   ]);
-  console.log(`seeded ${NUM_RES} Restraunts and ${NUM_USR} Users in ${(new Date() - START_TIME) / 60000} minutes`);
+  console.log(`seeded ${PART_RES} Restraunts and ${PART_USR} Users in ${(new Date() - START_TIME) / 60000} minutes`);
 
   var restaurants = saveRestaurants;
   var users = saveUsers;
@@ -84,12 +102,13 @@ async function seedDB() {
   });
   await ReviewCollection.insertMany(_.flatten(reviewModels));
   Client.close();
+  process.exit();
 }
 const START_TIME = new Date();
 seedDB().then((reviews) => {
   console.log(`saved around ${NUM_REV} reviews for each restaurant`);
   console.log(`finished in ${(new Date() - START_TIME) / 60000} minutes`);
-  process.exit();
+  // process.exit();
 }).catch((err) => {
   throw err;
 });
