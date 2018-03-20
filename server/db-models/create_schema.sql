@@ -1,1 +1,1 @@
-CREATE DATABASE restaurants;
+CREATE DATABASE reviewservice;

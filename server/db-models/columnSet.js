@@ -17,8 +17,9 @@ const statsColumn = [
 ];
 
 const reviewsColumn = [
-  'user',
-  'text',
+  'reviewid',
+  'userid',
+  'texts',
   'tags',
   'food',
   'service',
@@ -26,18 +27,20 @@ const reviewsColumn = [
   'value',
   'averagerating',
   'wouldrecommendtofriend',
-  'restaurant',
+  'restaurantid',
   'helpfulcount',
   'dinedon',
 ];
 
 const userColumn = [
+  'userid',
   'name',
   'isvip',
   'avatar',
 ];
 
 const restaurantColumn = [
+  'restrauntid',
   'name',
   'locations',
 ];
