@@ -3,11 +3,12 @@ const Chance = require('chance');
 const chance = new Chance();
 const express = require('express');
 const path = require('path');
+const helper = require('./helper.js');
 
 const DB_NAME = (process.env.TEST === 'true') ? 'testreviewservice' : 'reviewservice';
 
-const mongoose = require('mongoose');
-mongoose.connect(process.env.DB + DB_NAME);
+// const mongoose = require('mongoose');
+// mongoose.connect(process.env.DB + DB_NAME);
 const Models = require('./db-models/models.js');
 
 const app = express();
@@ -62,7 +63,7 @@ const getReviews = async (rid, page, page_length, sortOptions, search) => {
     return {...reviewClone, user: user._doc };
   }, reviews));
 
-  return { reviews: reviewsUsers, totalReviews: totalReviews }; 
+  return { reviews: reviewsUsers, totalReviews: totalReviews };
 }
 
 const router = express.Router();
@@ -77,7 +78,9 @@ router.get('/summary', amw(async (req, res, next) => {
   const restaurant   = chance.pickone(restaurants);
   const totalReviews = await Models.reviewsModel.find({ restaurant: restaurant._id }).count();
   const stats = await Models.statsModel.findOne({ restaurant: restaurant._id });
+  helper.covertKeysToCamelCase(stats);
   const dist  = await Models.ratingsDistModel.findOne({ _id: stats.ratingsDistribution });
+  helper.covertKeysToCamelCase(dist);
   const statsDist = {...stats._doc, ratingsDistribution: dist };
 
   res.send({ stats: 'ok', json: { stats: statsDist, totalReviews: totalReviews }});
@@ -105,9 +108,9 @@ router.get('/lowest/:rid/:page/:page_length/:search?', amw(async (req, res, next
 
 app.use('/', router);
 const server = app.listen(4004);
-
+console.log('success!')
 module.exports = {
   app: app,
   server: server,
-  mongoose: mongoose
+  // mongoose: mongoose
 };

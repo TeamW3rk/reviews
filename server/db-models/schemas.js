@@ -13,12 +13,10 @@ var ratingsDistributionSchema = new Schema({
 var statsSchema = new Schema({
   totalRatingsScore: Number,
   totalRatings: Number,
-  averageRating: {
-    food: Number,
-    service: Number,
-    ambience: Number,
-    value: Number
-  },
+  food: Number,
+  service: Number,
+  ambience: Number,
+  value: Number,
   recommendationPercentage: Number,
   ratingsDistribution: Schema.Types.ObjectId,
   noise: Number,
@@ -31,12 +29,10 @@ var reviewsSchema = new Schema({
   text: { type: String, text: true },
   tags: Array,
   averageRating: Number,
-  rating: {
-    food: Number,
-    service: Number,
-    ambience: Number,
-    value: Number
-  },
+  food: Number,
+  service: Number,
+  ambience: Number,
+  value: Number,
   wouldRecommendToFriend: Boolean,
   restaurant: Schema.Types.ObjectId,
   location: String,
