@@ -1,7 +1,7 @@
 CREATE TABLE users (
   userid INT,
   name TEXT,
-  isvip BOOLEAN,
+  is_v_i_p BOOLEAN,
   avatar TEXT
 );
 
@@ -13,16 +13,16 @@ CREATE TABLE restaurants (
 
 CREATE TABLE reviews (
   reviewid INT,
-  userid INT,
-  texts TEXT,
+  user INT,
+  text TEXT,
   tags TEXT,
   food INT,
   service INT,
   ambience INT,
   value INT,
-  averagerating INT,
-  wouldrecommendtofriend BOOLEAN,
-  restaurantid INT,
-  helpfulcount INT,
-  dinedon DATE
+  average_rating INT,
+  would_recommend_to_friend BOOLEAN,
+  restaurant INT,
+  helpful_count INT,
+  dined_on DATE
 );
