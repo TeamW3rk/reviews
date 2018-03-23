@@ -1,2 +1,4 @@
 node_modules
 public
+newrelic.js
+data
