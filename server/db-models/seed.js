@@ -9,9 +9,9 @@ const NUM_HOLD = 10000;
 
 console.log(DB_NAME);
 
-// const mongoose = require('mongoose');
+
 const MongoClient = require('mongodb').MongoClient;
-// mongoose.connect(`mongodb://localhost/${DB_NAME}`);
+
 const faker = require('faker');
 const chance = new require('chance')(); // for normally distributed numbers
 const Models = require('./models.js');
@@ -44,34 +44,35 @@ async function seedDB() {
   const PART_USR = Math.floor(NUM_USR / numCPUs);
   const PART_RES = Math.floor(NUM_RES / numCPUs);
 
+  async function seedUsers() {
+    let createdUsers = _.range(0, PART_USR).map(() => {
+      return Models.userModel({
+        name: faker.name.findName(),
+        isVIP: faker.random.boolean(),
+        avatar: faker.image.avatar()
+      });
+    });
+    await UserCollection.insertMany(createdUsers);
+    return createdUsers;
+  }
+
+  async function seedRestraunts(i) {
+    let createdRestaurants = _.range(i, i + NUM_HOLD).map(() => {
+      return Models.restaurantModel({
+        name: faker.random.words(2),
+        locations: _.map(() => faker.address.city() , _.range(0, Math.max(1, Math.round(chance.normal({ mean: 2 , dev: 1 })))))
+      });
+    });
+    await RestaurantCollection.insertMany(createdRestaurants);
+    return createdRestaurants;
+  }
+
   for (let i = 0; i < PART_RES; i += NUM_HOLD) {
     let saveUsers, saveRestaurants;
-    async function seedUsers() {
-        let createdUsers = _.range(0, PART_USR).map(() => {
-          return Models.userModel({
-            name: faker.name.findName(),
-            isVIP: faker.random.boolean(),
-            avatar: faker.image.avatar()
-          });
-        });
-        await UserCollection.insertMany(createdUsers);
-        return createdUsers;
-    }
-
-    async function seedRestraunts() {
-      let createdRestaurants = _.range(i, i + NUM_HOLD).map(() => {
-        return Models.restaurantModel({
-          name: faker.random.words(2),
-          locations: _.map(() => faker.address.city() , _.range(0, Math.max(1, Math.round(chance.normal({ mean: 2 , dev: 1 })))))
-        });
-      });
-      await RestaurantCollection.insertMany(createdRestaurants);
-      return createdRestaurants;
-    }
 
     await Promise.all([
       seedUsers().then(result => saveUsers = result),
-      seedRestraunts().then(result => saveRestaurants = result)
+      seedRestraunts(i).then(result => saveRestaurants = result)
     ]);
     console.log(`seeded ${i + NUM_HOLD} Restraunts and ${PART_USR} Users in ${(new Date() - START_TIME) / 60000} minutes`);
 
@@ -111,11 +112,3 @@ async function seedDB() {
   console.log(`finished in ${(new Date() - START_TIME) / 60000} minutes`);
   process.exit();
 }
-// const START_TIME = new Date();
-// seedDB().then((reviews) => {
-//   console.log(`saved around ${NUM_REV} reviews for each restaurant`);
-//   console.log(`finished in ${(new Date() - START_TIME) / 60000} minutes`);
-//   // process.exit();
-// }).catch((err) => {
-//   throw err;
-// });
