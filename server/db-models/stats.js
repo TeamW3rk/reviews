@@ -1,15 +1,9 @@
-const DB_NAME = process.argv[2];
-
-const mongoose = require('mongoose');
-mongoose.connect(process.env.DB + DB_NAME);
-const faker = require('faker');
 const chance = new require('chance')(); // for normally distributed numbers
-const Models = require('./models.js');
 const _ = require('ramda');
 
 
 
-function ratingDistribution(acc, rating){
+function ratingDistribution(acc, rating) {
   // console.log(rating, acc);
   var bucket = Math.max(rating.food, rating.service, rating.ambience, rating.value);
   acc[bucket] += 1;
@@ -17,17 +11,8 @@ function ratingDistribution(acc, rating){
   return acc;
 }
 
-Models.restaurantModel.find({}).then((docs) => {
-  return Promise.all(_.map((restaurant) => Models.reviewsModel.find({ restaurant: restaurant._id }), docs));
-}).then((reviewsList) => {
-  // console.log('reviewList length', reviewsList.length);
-
-
-  return Promise.all(_.map((reviews) => {
-    // console.log(reviews.length);
-
-    var totalStats = _.reduce((acc, review) => {
-
+const findStats = (restaurant, reviews) => {
+    const totalStatsArr = _.reduce((acc, review) => {
       return [ratingDistribution(acc[0], review.rating), {
         food: acc[1].food + review.rating.food,
         service: acc[1].service + review.rating.service,
@@ -36,15 +21,9 @@ Models.restaurantModel.find({}).then((docs) => {
         recommends: acc[1].recommends + Number(review.wouldRecommendToFriend)
       }];
     }, [{ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, { food: 0, service: 0, ambience: 0, value: 0, recommends: 0 }], reviews);
-
-
-    // console.log('totalStats', totalStats);
-
-    var dist = totalStats[0];
-    var totalStats = totalStats[1];
-
-    return Models.ratingsDistModel(dist).save().then((dist) => {
-      return Models.statsModel({
+    const dist = totalStatsArr[0];
+    const totalStats = totalStatsArr[1];
+    return {
         totalRatingsScore: totalStats.food + totalStats.service + totalStats.ambience + totalStats.value,
         totalRatings: reviews.length,
         averageRating: {
@@ -56,16 +35,10 @@ Models.restaurantModel.find({}).then((docs) => {
         recommendationPercentage: totalStats.recommends / reviews.length,
         noise: chance.normal({ mean: 0, dev: 1 }),
         restaurant: reviews[0].restaurant,
-        ratingsDistribution: dist._id
-      }).save();
-    });
+        ratingsDistribution: dist
+      }
+};
 
-
-
-  }, reviewsList));
-}).then((stats) => {
-  console.log('done calculating stats', stats.length);
-  process.exit();
-}).catch((err) => {
-  throw err;
-});
+module.exports = {
+  findStats: findStats
+};
