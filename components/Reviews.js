@@ -58,9 +58,9 @@ const Footer = ({ readMore, showReadMore }) => {
     <div className="actions">
       <i className="flag"></i>
       <span className="report-text">Report</span>
-      <i className="helpful"></i> 
+      <i className="helpful"></i>
       <span className="helpful-text">Helpful</span>
-    </div>    
+    </div>
 
   </div>
 };
@@ -112,7 +112,7 @@ class Review extends Component {
       let Word = text.slice(found, found + word.length);
 
       if (Math.max(0, found - 75) === 0){
-        frontEllipse = ''; 
+        frontEllipse = '';
       }
 
       if (Math.min(found + word.length, text.length) === text.length){
@@ -132,16 +132,16 @@ class Review extends Component {
     const searchWords = this.props.searchWords;
 
     return <div className="review">
-      <Summary 
-        rating={Utilities.starRating(review.rating)} 
-        review={review} 
+      <Summary
+        rating={Utilities.starRating(review.rating)}
+        review={review}
         user={user} />
-        {(searchWords.length > 0) ? 
-          <SearchSnippets getSnippet={this.getSearchSnippet} searchWords={searchWords} /> : 
+        {(searchWords.length > 0) ?
+          <SearchSnippets getSnippet={this.getSearchSnippet} searchWords={searchWords} /> :
           <Body readMore={this.state.readMore} text={review.text} /> }
-      
+
       <Footer readMore={this.onReadMore} showReadMore={this.state.readMore} />
-    </div>    
+    </div>
   }
 };
 
@@ -182,8 +182,13 @@ class Reviews extends Component {
 
   componentDidMount(){
     if (!this.props.test){
-      const getStats = axios(ROOT_PATH + '/summary');
-
+      const id = this.props.id || parseInt(window.location.pathname.split('/')[2], 10);;
+      let getStats;
+      if (id) {
+        getStats = axios(ROOT_PATH + `/summary/${id}`);
+      } else {
+        getStats = axios(ROOT_PATH + '/summary');
+      }
       getStats.then((response) => {
         const stats   = response.data.json.stats;
         const totalReviews = response.data.json.totalReviews;
@@ -206,7 +211,7 @@ class Reviews extends Component {
       const review = reviews[0];
       const filterWords = _.uniq(_.range(0, 5).map((idx) => this.randomWord(review.text).toLowerCase()));
 
-      this.setState({ reviews: reviews, page: currentPage, filterWords: filterWords });      
+      this.setState({ reviews: reviews, page: currentPage, filterWords: filterWords });
     });
   }
 
@@ -220,9 +225,9 @@ class Reviews extends Component {
         Cache.fetch(url).then((json) => {
           const reviews = json.reviews;
 
-          this.setState({ reviews: reviews, page: currentPage });          
-        });      
-      }      
+          this.setState({ reviews: reviews, page: currentPage });
+        });
+      }
     }
   }
 
@@ -251,7 +256,7 @@ class Reviews extends Component {
         const reviews = json.reviews;
         const totalReviews = json.totalReviews;
         this.setState({ reviews: reviews, totalReviews: totalReviews });
-      });     
+      });
     }
   }
 
@@ -275,7 +280,7 @@ class Reviews extends Component {
         filters: updatedFilters
       }, () => {
         const sortBy = this.state.sortByValue;
-        this.getAndUpdateReviews(this.generateGetURL(sortBy, updatedFilters));        
+        this.getAndUpdateReviews(this.generateGetURL(sortBy, updatedFilters));
       });
     }
   }
@@ -337,7 +342,7 @@ class Reviews extends Component {
       const filterWords = Object.keys(activeFilters);
 
       return filterWords;
-    } 
+    }
 
 
     return <div id="reviews" className="reviews">
@@ -349,9 +354,9 @@ class Reviews extends Component {
         </div>
         <h2>Filters</h2>
         <div className="filter-container">
-          <FilterCheckboxes 
-            onCheck={this.onFilterCheck} 
-            words={this.state.filterWords} 
+          <FilterCheckboxes
+            onCheck={this.onFilterCheck}
+            words={this.state.filterWords}
             checks={this.state.filters}
             mousein={this.mousein}
             mouseout={this.mouseout} />
@@ -364,14 +369,14 @@ class Reviews extends Component {
         }): undefined}
       </div>
       <div className="reviews-footer">
-        <Pages 
-          totalReviews={this.state.totalReviews} 
-          pageLength={this.state.pageLength} 
-          loadPage={this.loadPage} 
+        <Pages
+          totalReviews={this.state.totalReviews}
+          pageLength={this.state.pageLength}
+          loadPage={this.loadPage}
           currentPage={this.state.page}
           mousein={this.mousein}
           mouseout={this.mouseout} />
-      </div> 
+      </div>
     </div>;
   }
 }

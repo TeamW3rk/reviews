@@ -57,8 +57,9 @@ async function seedDB() {
   }
 
   async function seedRestraunts(i) {
-    let createdRestaurants = _.range(i, i + NUM_HOLD).map(() => {
+    let createdRestaurants = _.range(i, i + NUM_HOLD).map((index) => {
       return Models.restaurantModel({
+        restID: ((id - 1) * PART_RES) + index,
         name: faker.random.words(2),
         locations: _.map(() => faker.address.city() , _.range(0, Math.max(1, Math.round(chance.normal({ mean: 2 , dev: 1 })))))
       });

@@ -2,3 +2,4 @@ node_modules
 public
 newrelic.js
 data
+dump.rdb

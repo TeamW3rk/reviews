@@ -53,6 +53,7 @@ var userSchema = new Schema({
 });
 
 var restaurantSchema = new Schema({
+  restID: Number,
   name: String,
   locations: Array
 });
