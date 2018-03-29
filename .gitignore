@@ -1,5 +1,7 @@
 node_modules
 public
+client/dist/bundle.js
+client/dist/bundle.js.gz
 newrelic.js
 data
 dump.rdb
